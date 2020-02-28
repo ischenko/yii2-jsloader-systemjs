@@ -7,4 +7,3 @@ require_once __DIR__ . implode(DIRECTORY_SEPARATOR, ['', '..', 'vendor', 'autolo
 require_once __DIR__ . implode(DIRECTORY_SEPARATOR, ['', '..', 'vendor', 'yiisoft', 'yii2', 'Yii.php']);
 
 Yii::setAlias('@tests', __DIR__);
-Yii::setAlias('@runtime', '@tests/_output');

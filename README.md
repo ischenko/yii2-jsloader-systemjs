@@ -28,3 +28,24 @@ or add
 ```
 
 to the `require` section of your composer.json.
+
+## Usage
+
+Add the [behavior](https://github.com/ischenko/yii2-jsloader#usage) and systemjs loader to the view configuration
+
+```php
+    ...
+    'components' => [
+        ...
+        'view' => [
+            'as jsLoader' => [
+                'class' => 'ischenko\yii2\jsloader\Behavior',
+                'loader' => [
+                    'class' => 'ischenko\yii2\jsloader\SystemJs',
+                ]
+            ]
+        ]
+        ...
+    ]
+    ...
+```
