@@ -71,8 +71,8 @@ class SystemJs extends Loader
         static $extras = [];
 
         if ($extras === []) {
-            $extras['system.js'] = ['amd', 'transform', 'named-exports', 'named-register'];
-            $extras['s.js'] = array_merge($extras['system.js'], ['global', 'module-types']);
+            $extras['system'] = ['amd', 'transform', 'named-exports', 'named-register'];
+            $extras['s'] = array_merge($extras['system'], ['global', 'module-types']);
         }
 
         $view = $this->getView();
@@ -80,10 +80,10 @@ class SystemJs extends Loader
         list(, $url) = $view->getAssetManager()->publish('@bower/system.js/dist');
 
         // resolve script files
-        $libFile = $this->minimal ? 's.js' : 'system.js';
+        $libFile = $this->minimal ? 's' : 'system';
         $scripts = array_intersect($this->extras, $extras[$libFile]);
         $scripts = array_map(function ($script) {
-            return "extras/{$script}.js";
+            return "extras/{$script}";
         }, array_unique($scripts));
 
         // resolve position
@@ -97,10 +97,10 @@ class SystemJs extends Loader
 
         $options = ['position' => $position];
 
-        $view->registerJsFile("{$url}/{$libFile}", $options);
+        static $jsExt = YII_DEBUG ? 'js' : 'min.js';
 
-        foreach ($scripts as $script) {
-            $view->registerJsFile("{$url}/{$script}", $options);
+        foreach (array_merge([$libFile], $scripts) as $script) {
+            $view->registerJsFile("{$url}/{$script}.{$jsExt}", $options);
         }
     }
 }
