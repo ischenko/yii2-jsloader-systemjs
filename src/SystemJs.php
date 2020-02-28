@@ -68,9 +68,9 @@ class SystemJs extends Loader
      */
     private function registerLibraryFiles()
     {
-        static $extras;
+        static $extras = [];
 
-        if ($extras === null) {
+        if ($extras === []) {
             $extras['system.js'] = ['amd', 'transform', 'named-exports', 'named-register'];
             $extras['s.js'] = array_merge($extras['system.js'], ['global', 'module-types']);
         }
