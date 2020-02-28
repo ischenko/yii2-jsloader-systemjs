@@ -1,0 +1,24 @@
+namespace: ischenko\yii2\jsloader\tests
+actor: Tester
+paths:
+    tests: tests
+    log: tests/_output
+    data: tests/_data
+    support: tests/_support
+    envs: tests/_envs
+
+bootstrap: _bootstrap.php
+
+settings:
+    colors: true
+    memory_limit: 1024M
+
+coverage:
+    enabled: true
+    whitelist:
+        include:
+            - src/*
+
+extensions:
+    enabled:
+        - Codeception\Extension\RunFailed

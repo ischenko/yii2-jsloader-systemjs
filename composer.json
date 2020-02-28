@@ -1,0 +1,37 @@
+{
+  "name": "ischenko/yii2-jsloader-systemjs",
+  "description": "An Yii2 extension that allows to handle asset bundles via systemjs",
+  "keywords": [
+    "yii2",
+    "view",
+    "systemjs",
+    "behavior",
+    "assets"
+  ],
+  "type": "yii2-extension",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Roman Ishchenko",
+      "email": "roman@ishchenko.ck.ua"
+    }
+  ],
+  "require": {
+    "php": ">=7.1",
+    "ext-json": "*",
+    "bower-asset/system.js": "^6.2",
+    "ischenko/yii2-jsloader": "~1.2.3"
+  },
+  "require-dev": {
+    "codeception/verify": "~1.2",
+    "codeception/specify": "~1.2",
+    "codeception/codeception": "~4.0",
+    "codeception/assert-throws": "~1.0",
+    "codeception/module-asserts": "~1.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "ischenko\\yii2\\jsloader\\": "src/"
+    }
+  }
+}

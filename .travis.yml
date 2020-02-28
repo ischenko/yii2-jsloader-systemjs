@@ -1,0 +1,37 @@
+language: php
+
+php:
+  - 7.1
+  - 7.2
+  - 7.3
+  - 7.4
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=a23b1e7dd52c9ffad1dbcddee369f192678272f4ac272bc8a94742b0c5284bd0
+
+matrix:
+  fast_finish: true
+
+sudo: false
+
+cache:
+  directories:
+    - vendor
+
+install:
+  - |
+  - travis_retry composer self-update && composer --version
+  - travis_retry composer config -g use-github-api 0
+  - travis_retry composer update --no-interaction
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+script:
+  - vendor/bin/codecept run $CODECEPT_FLAGS
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
