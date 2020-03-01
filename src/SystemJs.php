@@ -8,6 +8,10 @@
 namespace ischenko\yii2\jsloader;
 
 use ischenko\yii2\jsloader\base\Loader;
+use ischenko\yii2\jsloader\helpers\JsExpression;
+use ischenko\yii2\jsloader\systemjs\Config;
+use ischenko\yii2\jsloader\systemjs\JsRenderer;
+use yii\di\Instance;
 use yii\web\View;
 
 /**
@@ -18,6 +22,14 @@ use yii\web\View;
  */
 class SystemJs extends Loader
 {
+    /**
+     * A list of allowed extras
+     */
+    const AVAILABLE_EXTRAS = [
+        'system' => ['amd', 'transform', 'named-exports', 'named-register'],
+        's' => ['amd', 'transform', 'named-exports', 'named-register', 'global', 'module-types']
+    ];
+
     /**
      * Supported extras:
      *  - amd
@@ -42,50 +54,127 @@ class SystemJs extends Loader
     public $position;
 
     /**
+     * @var string|array|JsRendererInterface
+     */
+    public $renderer = JsRenderer::class;
+
+    /**
+     * @var Config
+     */
+    private $config;
+
+    /**
+     * {@inheritDoc}
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function init()
+    {
+        parent::init();
+
+        $this->renderer = Instance::ensure($this->renderer, JsRendererInterface::class);
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @return ConfigInterface
      */
     public function getConfig(): ConfigInterface
     {
-        // TODO: Implement getConfig() method.
+        if ($this->config === null) {
+            $this->config = new Config();
+        }
+
+        return $this->config;
     }
 
     /**
      * {@inheritDoc}
      *
-     * @param array $jsExpressions
+     * @param JsExpression[] $expressions
+     *
+     * @return void
      */
-    protected function doRender(array $jsExpressions)
+    protected function renderJs(array $expressions): void
     {
-        // TODO: Implement doRender() method.
+        $jsCode = '';
 
+        krsort($expressions);
+
+        foreach ($expressions as $pos => $expression) {
+            $this->appendJsCode($jsCode, $expression, $pos);
+            $jsCode = $expression->render($this->renderer);
+        }
+
+        // register systemJs files in the View
         $this->registerLibraryFiles();
+
+        // register JS code at the load position
+        $this->getView()->registerJs($jsCode, View::POS_LOAD);
+
+//        if (($importMap = $this->getConfig()->toArray()) !== []) {
+//            $options = [
+//                'type' => 'systemjs-importmap',
+//                'position' => $this->getPosition()
+//            ];
+//
+//            $this->getView()->registerJsFile('', $options);
+//        }
     }
 
     /**
      * Register SystemJs files according to the configuration
      */
-    private function registerLibraryFiles()
+    protected function registerLibraryFiles()
     {
-        static $extras = [];
-
-        if ($extras === []) {
-            $extras['system'] = ['amd', 'transform', 'named-exports', 'named-register'];
-            $extras['s'] = array_merge($extras['system'], ['global', 'module-types']);
-        }
-
         $view = $this->getView();
 
         list(, $url) = $view->getAssetManager()->publish('@bower/system.js/dist');
 
         // resolve script files
         $libFile = $this->minimal ? 's' : 'system';
-        $scripts = array_intersect($this->extras, $extras[$libFile]);
+        $scripts = array_intersect($this->extras, self::AVAILABLE_EXTRAS[$libFile]);
         $scripts = array_map(function ($script) {
             return "extras/{$script}";
         }, array_unique($scripts));
 
+        $jsExt = YII_DEBUG ? 'js' : 'min.js';
+        $options = ['position' => $this->getPosition()];
+
+        foreach (array_merge([$libFile], $scripts) as $script) {
+            $view->registerJsFile("{$url}/{$script}.{$jsExt}", $options);
+        }
+    }
+
+    /**
+     * @param string $js
+     * @param JsExpression $expression
+     * @param int $pos
+     */
+    private function appendJsCode(string $js, JsExpression $expression, int $pos)
+    {
+        while (($code = $expression->getExpression()) instanceof JsExpression) {
+            $expression = $code;
+        }
+
+        if ($pos === View::POS_READY && !empty($code)) {
+            $code = "jQuery(function() {\n{$code}\n})";
+        }
+
+        if (!empty($js)) {
+            $code .= ";\n{$js}";
+        }
+
+        $expression->setExpression($code);
+    }
+
+    /**
+     * Resolves position for script tags
+     *
+     * @return int
+     */
+    private function getPosition(): int
+    {
         // resolve position
         $position = $this->position ?? View::POS_HEAD;
 
@@ -95,12 +184,7 @@ class SystemJs extends Loader
             $position = View::POS_END;
         }
 
-        $options = ['position' => $position];
-
-        static $jsExt = YII_DEBUG ? 'js' : 'min.js';
-
-        foreach (array_merge([$libFile], $scripts) as $script) {
-            $view->registerJsFile("{$url}/{$script}.{$jsExt}", $options);
-        }
+        return $position;
     }
+
 }

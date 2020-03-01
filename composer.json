@@ -20,7 +20,7 @@
     "php": ">=7.1",
     "ext-json": "*",
     "bower-asset/system.js": "^6.2",
-    "ischenko/yii2-jsloader": "~1.2.3"
+    "ischenko/yii2-jsloader": "~1.3.0"
   },
   "require-dev": {
     "codeception/verify": "~1.2",
