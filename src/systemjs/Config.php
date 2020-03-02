@@ -7,7 +7,7 @@
 
 namespace ischenko\yii2\jsloader\systemjs;
 
-use ischenko\yii2\jsloader\helpers\JsExpression;
+use ischenko\yii2\jsloader\helpers\FileHelper;
 
 /**
  * SystemJs-specific implementation of the configuration
@@ -24,6 +24,72 @@ class Config extends \ischenko\yii2\jsloader\base\Config
      */
     public function toArray(): array
     {
-        // TODO: Implement toArray() method.
+        $this->prepareModules();
+
+        $importMap = ['imports' => [], 'scopes' => []];
+
+        foreach ($this->getModules() as $module) {
+            $alias = $module->getAlias();
+            $baseUrl = $module->getBaseUrl();
+
+            if (($files = $module->getFiles()) !== []) {
+                $importMap['imports'][$alias] = key($files);
+            } elseif (($deps = $module->getDependencies()) !== []) {
+                $importMap['imports'][$alias] = current($deps)->getAlias();
+            }
+
+            // default folder mapping
+            if ($baseUrl !== '') {
+                $importMap['imports'][$alias . '/'] = rtrim($baseUrl, '/') . '/';
+            }
+        }
+
+        return array_filter($importMap);
+    }
+
+    /**
+     * Prepares modules
+     */
+    private function prepareModules(): void
+    {
+        foreach ($this->getModules() as $module) {
+            $files = $module->getFiles();
+
+            // skip modules without files or with single file
+            if (count($files) <= 1) {
+                continue;
+            }
+
+            $dependencies = $module->getDependencies();
+
+            $module->clearFiles();
+            $module->clearDependencies();
+
+            $prevModule = null;
+            $extension = '.js';
+
+            $alias = $module->getAlias();
+            $baseUrl = $module->getBaseUrl();
+            $regex = '#^' . preg_quote($baseUrl) . '#';
+
+            foreach ($files as $file => $options) {
+                $file = FileHelper::removeExtension($file, $extension);
+                $newModule = preg_replace($regex, '', $file, 1, $count);
+
+                if ($count > 0 && $baseUrl !== '') {
+                    $newModule = FileHelper::normalizePath("{$alias}/{$newModule}", '/');
+                }
+
+                $newModule = $this->addModule($newModule)
+                    ->addFile($file . $extension, $options)
+                    ->setDependencies($dependencies);
+
+                if ($prevModule !== null) {
+                    $newModule->addDependency($prevModule);
+                }
+
+                $module->addDependency($prevModule = $newModule);
+            }
+        }
     }
 }

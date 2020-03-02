@@ -17,7 +17,7 @@ use yii\base\BaseObject;
  * @author Roman Ishchenko <roman@ishchenko.ck.ua>
  * @since 1.0
  */
-class JsRenderer extends BaseObject implements JsRendererInterface
+class InlineRenderer extends BaseObject implements JsRendererInterface
 {
     /**
      * @param JsExpression $expression
@@ -25,6 +25,6 @@ class JsRenderer extends BaseObject implements JsRendererInterface
      */
     public function renderJsExpression(JsExpression $expression): string
     {
-        // TODO: Implement renderJsExpression() method.
+
     }
 }

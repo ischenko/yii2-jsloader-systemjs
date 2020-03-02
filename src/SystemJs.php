@@ -10,7 +10,7 @@ namespace ischenko\yii2\jsloader;
 use ischenko\yii2\jsloader\base\Loader;
 use ischenko\yii2\jsloader\helpers\JsExpression;
 use ischenko\yii2\jsloader\systemjs\Config;
-use ischenko\yii2\jsloader\systemjs\JsRenderer;
+use ischenko\yii2\jsloader\systemjs\InlineRenderer;
 use yii\di\Instance;
 use yii\web\View;
 
@@ -56,7 +56,7 @@ class SystemJs extends Loader
     /**
      * @var string|array|JsRendererInterface
      */
-    public $renderer = JsRenderer::class;
+    public $renderer = InlineRenderer::class;
 
     /**
      * @var Config
@@ -110,7 +110,7 @@ class SystemJs extends Loader
         $this->registerLibraryFiles();
 
         // register JS code at the load position
-        $this->getView()->registerJs($jsCode, View::POS_LOAD);
+        $this->getView()->registerJs($jsCode, View::POS_END);
 
 //        if (($importMap = $this->getConfig()->toArray()) !== []) {
 //            $options = [
@@ -124,6 +124,7 @@ class SystemJs extends Loader
 
     /**
      * Register SystemJs files according to the configuration
+     * @throws \yii\base\InvalidConfigException
      */
     protected function registerLibraryFiles()
     {
@@ -133,6 +134,11 @@ class SystemJs extends Loader
 
         // resolve script files
         $libFile = $this->minimal ? 's' : 'system';
+
+        if ($this->minimal) {
+            $this->extras[] = 'module-types';
+        }
+
         $scripts = array_intersect($this->extras, self::AVAILABLE_EXTRAS[$libFile]);
         $scripts = array_map(function ($script) {
             return "extras/{$script}";
@@ -141,7 +147,9 @@ class SystemJs extends Loader
         $jsExt = YII_DEBUG ? 'js' : 'min.js';
         $options = ['position' => $this->getPosition()];
 
-        foreach (array_merge([$libFile], $scripts) as $script) {
+        array_unshift($scripts, $libFile);
+
+        foreach ($scripts as $script) {
             $view->registerJsFile("{$url}/{$script}.{$jsExt}", $options);
         }
     }

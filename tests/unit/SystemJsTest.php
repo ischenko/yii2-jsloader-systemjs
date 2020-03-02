@@ -8,7 +8,7 @@ use ischenko\yii2\jsloader\ConfigInterface;
 use ischenko\yii2\jsloader\helpers\JsExpression;
 use ischenko\yii2\jsloader\JsRendererInterface;
 use ischenko\yii2\jsloader\SystemJs;
-use ischenko\yii2\jsloader\systemjs\JsRenderer;
+use ischenko\yii2\jsloader\systemjs\InlineRenderer;
 use yii\base\InvalidConfigException;
 use yii\web\View;
 
@@ -19,11 +19,11 @@ class SystemJsTest extends Unit
         /** @var SystemJs $sJs */
         $sJs = $this->make(SystemJs::class);
 
-        verify($sJs->renderer)->equals(JsRenderer::class);
+        verify($sJs->renderer)->equals(InlineRenderer::class);
 
         $sJs->init();
 
-        verify($sJs->renderer)->isInstanceOf(JsRenderer::class);
+        verify($sJs->renderer)->isInstanceOf(InlineRenderer::class);
         verify($sJs->renderer)->isInstanceOf(JsRendererInterface::class);
     }
 
@@ -68,11 +68,11 @@ class SystemJsTest extends Unit
     public function systemJsConfigsProvider()
     {
         return [
-            [[], ['s.js']],
-            [['minimal' => true], ['s.js']],
+            [[], ['s.js', 'extras/module-types.js']],
+            [['minimal' => true], ['s.js', 'extras/module-types.js']],
             [['minimal' => false], ['system.js']],
-            [['extras' => ['amd', 'test']], ['s.js', 'extras/amd.js']],
-            [['extras' => ['amd', 'global']], ['s.js', 'extras/amd.js', 'extras/global.js']],
+            [['extras' => ['amd', 'test']], ['s.js', 'extras/amd.js', 'extras/module-types.js']],
+            [['extras' => ['amd', 'global']], ['s.js', 'extras/amd.js', 'extras/global.js', 'extras/module-types.js']],
             [['extras' => ['amd', 'global'], 'minimal' => false], ['system.js', 'extras/amd.js']]
         ];
     }
@@ -123,7 +123,7 @@ class SystemJsTest extends Unit
             'js' => $jsBlocks,
             'registerJs' => Expected::once(function ($js, $position) use ($expected) {
                 verify($js)->equals($expected);
-                verify($position)->equals(View::POS_LOAD);
+                verify($position)->equals(View::POS_END);
             })
         ]);
 
