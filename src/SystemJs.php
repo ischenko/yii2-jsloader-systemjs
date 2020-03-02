@@ -8,10 +8,13 @@
 namespace ischenko\yii2\jsloader;
 
 use ischenko\yii2\jsloader\base\Loader;
+use ischenko\yii2\jsloader\helpers\FileHelper;
 use ischenko\yii2\jsloader\helpers\JsExpression;
 use ischenko\yii2\jsloader\systemjs\Config;
 use ischenko\yii2\jsloader\systemjs\InlineRenderer;
+use yii\base\InvalidConfigException;
 use yii\di\Instance;
+use yii\helpers\Json;
 use yii\web\View;
 
 /**
@@ -65,7 +68,7 @@ class SystemJs extends Loader
 
     /**
      * {@inheritDoc}
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
     public function init()
     {
@@ -94,8 +97,56 @@ class SystemJs extends Loader
      * @param JsExpression[] $expressions
      *
      * @return void
+     * @throws InvalidConfigException
      */
     protected function renderJs(array $expressions): void
+    {
+        $this->registerImportMap();
+        $this->registerLibraryFiles();
+        $this->registerJsCode($expressions);
+    }
+
+    /**
+     * Registers a JSON file with import map
+     * @throws InvalidConfigException
+     */
+    protected function registerImportMap(): void
+    {
+        if (($importMap = $this->getConfig()->toArray()) === []) {
+            return;
+        }
+
+        $options = 320 | JSON_FORCE_OBJECT;
+
+        if (YII_DEBUG) {
+            $options |= JSON_PRETTY_PRINT;
+        }
+
+        $importMap = Json::encode($importMap, $options);
+
+        $filePath = $this->getRuntimePath() . DIRECTORY_SEPARATOR . md5($importMap) . '.json';
+        $filePath = FileHelper::normalizePath($filePath);
+
+        if (!file_exists($filePath)) {
+            file_put_contents($filePath, $importMap, LOCK_EX);
+        }
+
+        $view = $this->getView();
+
+        list(, $url) = $view->getAssetManager()->publish($filePath);
+
+        $view->registerJsFile($url, [
+            'type' => 'systemjs-importmap',
+            'position' => $this->getPosition()
+        ]);
+    }
+
+    /**
+     * Registers JS code from expressions
+     *
+     * @param JsExpression[] $expressions
+     */
+    protected function registerJsCode(array $expressions): void
     {
         $jsCode = '';
 
@@ -106,27 +157,15 @@ class SystemJs extends Loader
             $jsCode = $expression->render($this->renderer);
         }
 
-        // register systemJs files in the View
-        $this->registerLibraryFiles();
-
         // register JS code at the load position
         $this->getView()->registerJs($jsCode, View::POS_END);
-
-//        if (($importMap = $this->getConfig()->toArray()) !== []) {
-//            $options = [
-//                'type' => 'systemjs-importmap',
-//                'position' => $this->getPosition()
-//            ];
-//
-//            $this->getView()->registerJsFile('', $options);
-//        }
     }
 
     /**
      * Register SystemJs files according to the configuration
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
-    protected function registerLibraryFiles()
+    protected function registerLibraryFiles(): void
     {
         $view = $this->getView();
 
@@ -194,5 +233,4 @@ class SystemJs extends Loader
 
         return $position;
     }
-
 }

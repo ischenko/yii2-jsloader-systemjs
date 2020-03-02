@@ -9,9 +9,16 @@ use ischenko\yii2\jsloader\helpers\JsExpression;
 use ischenko\yii2\jsloader\JsRendererInterface;
 use ischenko\yii2\jsloader\SystemJs;
 use ischenko\yii2\jsloader\systemjs\InlineRenderer;
+use ischenko\yii2\jsloader\tests\UnitTester;
 use yii\base\InvalidConfigException;
+use yii\web\AssetBundle;
+use yii\web\AssetManager;
 use yii\web\View;
 
+/**
+ * Class SystemJsTest
+ * @property UnitTester $tester
+ */
 class SystemJsTest extends Unit
 {
     public function testRendererInitialization()
@@ -56,7 +63,7 @@ class SystemJsTest extends Unit
 
         /** @var SystemJs $sJs */
         $sJs = $this->construct(SystemJs::class, [$view],
-            ['getConfig' => $this->makeEmpty(ConfigInterface::class)]);
+            ['getConfig' => $this->makeEmpty(ConfigInterface::class), 'registerImportMap' => null]);
 
         foreach ($config as $key => $value) {
             $sJs->$key = $value;
@@ -95,7 +102,7 @@ class SystemJsTest extends Unit
 
         /** @var SystemJs $sJs */
         $sJs = $this->construct(SystemJs::class, [$view],
-            ['getConfig' => $this->makeEmpty(ConfigInterface::class)]);
+            ['getConfig' => $this->makeEmpty(ConfigInterface::class), 'registerImportMap' => null]);
 
         $sJs->position = $position;
 
@@ -229,6 +236,99 @@ class SystemJsTest extends Unit
                     ]
                 ],
                 "test1\ntest2;\ntest3\ntest4;\ntest7\ntest8;\njQuery(function() {\ntest5\ntest6\n});\ntest9\ntest10"
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider assetBundlesProvider
+     */
+    public function testRegisteringImportMap($bundles, $callsCount, $expectedMap)
+    {
+        /** @var View $view */
+        $view = $this->make(View::class, [
+            'assetBundles' => $bundles,
+            'getAssetManager' => $this->make(AssetManager::class, [
+                'publish' => Expected::exactly($callsCount, function ($file) use ($expectedMap) {
+                    verify($expectedMap)->equalsJsonFile($file);
+                    return [$file, $file];
+                })
+            ]),
+            'registerJsFile' => Expected::exactly($callsCount, function ($js, $options) {
+                verify($options)->hasKey('type');
+                verify($options['type'])->equals('systemjs-importmap');
+                verify($options)->hasKey('position');
+                verify($options['position'])->equals(View::POS_HEAD);
+            })
+        ]);
+
+        /** @var SystemJs $sJs */
+        $sJs = $this->construct(SystemJs::class, [$view],
+            [
+                'renderer' => $this->makeEmpty(JsRendererInterface::class, [
+                    'renderJsExpression' => ''
+                ]),
+                'registerLibraryFiles' => null,
+                'registerJsCode' => null
+            ]);
+
+        $this->tester->cleanDir(\Yii::getAlias($sJs->runtimePath));
+
+        $sJs->setIgnorePositions([]);
+        $sJs->processBundles();
+        $sJs->processAssets();
+    }
+
+    public function assetBundlesProvider()
+    {
+        return [
+            [
+                [
+                    'test1' => $this->makeEmpty(AssetBundle::class, ['js' => []])
+                ],
+                0,
+                ''
+            ],
+
+            [
+                [
+                    'test1' => $this->makeEmpty(AssetBundle::class, ['js' => ['testing.js']])
+                ],
+                1,
+                "{
+    \"imports\": {
+        \"test1\": \"/testing.js\"
+    }
+}"
+            ],
+
+            [
+                [
+                    'test1' => $this->makeEmpty(AssetBundle::class, ['js' => ['testing.js'], 'baseUrl' => '/url'])
+                ],
+                1,
+                "{
+    \"imports\": {
+        \"test1\": \"/url/testing.js\",
+        \"test1/\": \"/url/\"
+    }
+}"
+            ],
+
+            [
+                [
+                    'test1' => $this->makeEmpty(AssetBundle::class,
+                        ['js' => ['testing.js', 's/testing.js'], 'baseUrl' => '/url'])
+                ],
+                1,
+                "{
+    \"imports\": {
+        \"test1\": \"test1/testing\",
+        \"test1/\": \"/url/\",
+        \"test1/testing\": \"/url/testing.js\",
+        \"test1/s/testing\": \"/url/s/testing.js\"
+    }
+}"
             ]
         ];
     }

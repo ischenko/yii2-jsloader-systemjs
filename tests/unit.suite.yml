@@ -8,6 +8,7 @@ modules:
     enabled:
         - Yii2
         - Asserts
+        - Filesystem
 
     config:
       Yii2:
