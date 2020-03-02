@@ -49,3 +49,37 @@ Add the [behavior](https://github.com/ischenko/yii2-jsloader#usage) and systemjs
     ]
     ...
 ```
+
+Loader accepts the following options:
+ - **extras**: *array* a list of systemJs extras to load. Possible values are:
+    - amd
+    - transform
+    - named-exports
+    - named-register
+    - global
+    - module-types 
+ - **minimal**: *boolean* indicates whether to load core version (s.js) or full version (system.js) of the library
+ - **position**: *integer* a position where the library and import map should be added to
+ - **renderer**: *string*|*array* configuration for the JS expressions renderer object
+
+ ```php
+     ...
+     'components' => [
+         ...
+         'view' => [
+             'as jsLoader' => [
+                 'class' => 'ischenko\yii2\jsloader\Behavior',
+                 'loader' => [
+                     'minimal' => false,
+                     'extras' => ['amd'],
+                     'position' => \yii\web\View::POS_HEAD,
+                     'class' => 'ischenko\yii2\jsloader\SystemJs',
+                 ]
+             ]
+         ]
+         ...
+     ]
+     ...
+ ```
+
+**Please note** that aliases works only within client-side code. On server-side you still need to operate with actual module names.
