@@ -272,7 +272,11 @@ class SystemJsTest extends Unit
                 'registerJsCode' => null
             ]);
 
-        $this->tester->cleanDir(\Yii::getAlias($sJs->runtimePath));
+        $runtime = \Yii::getAlias($sJs->runtimePath);
+
+        if (file_exists($runtime)) {
+            $this->tester->cleanDir($runtime);
+        }
 
         $sJs->setIgnorePositions([]);
         $sJs->processBundles();
