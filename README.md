@@ -12,7 +12,7 @@ An Yii2 extension that allows to register asset bundles as [systemjs](https://gi
 ## Installation
 *Requires PHP >= 7.1
 
-*Requires [ischenko/yii2-jsloader](https://github.com/ischenko/yii2-jsloader) >= 1.2
+*Requires [ischenko/yii2-jsloader](https://github.com/ischenko/yii2-jsloader) >= 1.3
 
 The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
 
