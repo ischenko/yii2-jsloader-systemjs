@@ -3,12 +3,21 @@
 namespace ischenko\yii2\jsloader\tests\unit\systemjs;
 
 use Codeception\Test\Unit;
-use ischenko\yii2\jsloader\base\Module;
+use ischenko\yii2\jsloader\base\Module as BaseModule;
 use ischenko\yii2\jsloader\ModuleInterface;
 use ischenko\yii2\jsloader\systemjs\Config;
+use ischenko\yii2\jsloader\systemjs\Module;
 
 class ConfigTest extends Unit
 {
+    public function testModuleCreation()
+    {
+        /** @var Config $config */
+        $config = $this->construct(Config::class);
+
+        verify($config->addModule('test'))->isInstanceOf(Module::class);
+    }
+
     /**
      * @dataProvider toArrayTestDataProvider
      */
@@ -73,7 +82,7 @@ class ConfigTest extends Unit
 
             [
                 [
-                    $this->construct(Module::class, ['test'], [
+                    $this->construct(BaseModule::class, ['test'], [
                         'getAlias' => 'test',
                         'getBaseUrl' => 'test/url',
                         'files' => [

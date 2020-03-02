@@ -62,7 +62,10 @@ class InlineRenderer extends BaseObject implements JsRendererInterface
             $alias = $module->getAlias();
 
             $import = "System.import(" . Json::encode($alias) . ")";
-            $export = $module->getOptions()['systemjs']['exports'] ?? '';
+
+            $export = $module instanceof Module
+                ? $module->getExports()
+                : $module->getOptions()['systemjs']['exports'] ?? '';
 
             if (!empty($export)) {
                 $code = "var {$export} = __sjs_module_" . $this->moduleIndex . ".default;\n{$code}";

@@ -8,6 +8,7 @@
 namespace ischenko\yii2\jsloader\systemjs;
 
 use ischenko\yii2\jsloader\helpers\FileHelper;
+use ischenko\yii2\jsloader\ModuleInterface;
 
 /**
  * SystemJs-specific implementation of the configuration
@@ -45,6 +46,21 @@ class Config extends \ischenko\yii2\jsloader\base\Config
         }
 
         return array_filter($importMap);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param ModuleInterface|string $module
+     * @return ModuleInterface
+     */
+    public function addModule($module): ModuleInterface
+    {
+        if (!($module instanceof ModuleInterface)) {
+            $module = new Module($module);
+        }
+
+        return parent::addModule($module);
     }
 
     /**
