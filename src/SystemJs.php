@@ -49,7 +49,7 @@ class SystemJs extends Loader
     /**
      * @var bool use minimal loader s.js instead of system.js loader
      */
-    public $minimal = true;
+    public $minimal = false;
 
     /**
      * @var int|null

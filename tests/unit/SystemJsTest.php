@@ -75,11 +75,14 @@ class SystemJsTest extends Unit
     public function systemJsConfigsProvider()
     {
         return [
-            [[], ['s.js', 'extras/module-types.js']],
+            [[], ['system.js']],
             [['minimal' => true], ['s.js', 'extras/module-types.js']],
             [['minimal' => false], ['system.js']],
-            [['extras' => ['amd', 'test']], ['s.js', 'extras/amd.js', 'extras/module-types.js']],
-            [['extras' => ['amd', 'global']], ['s.js', 'extras/amd.js', 'extras/global.js', 'extras/module-types.js']],
+            [['extras' => ['amd', 'test'], 'minimal' => true], ['s.js', 'extras/amd.js', 'extras/module-types.js']],
+            [
+                ['extras' => ['amd', 'global'], 'minimal' => true],
+                ['s.js', 'extras/amd.js', 'extras/global.js', 'extras/module-types.js']
+            ],
             [['extras' => ['amd', 'global'], 'minimal' => false], ['system.js', 'extras/amd.js']]
         ];
     }
