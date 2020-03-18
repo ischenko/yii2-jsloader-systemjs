@@ -88,6 +88,29 @@ class InlineRendererTest extends Unit
                             'getOptions' => [
                                 'systemjs' => ['exports' => 'export_alias']
                             ],
+                            'getDependencies' => function () use (&$s5mod2) {
+                                return [$s5mod2];
+                            },
+                            'getFiles' => ['testing.js' => []]
+                        ]),
+                        $s5mod2 = $this->makeEmpty(ModuleInterface::class, [
+                            'getAlias' => 'mod2',
+                            'getFiles' => ['testing2.js' => []]
+                        ])
+                    ]
+                ]),
+                "System.import(\"mod2\").then(function() {\nSystem.import(\"mod1\").then(function(__sjs_module_1) {\nvar export_alias = __sjs_module_1.default;\nconsole.log('test');\n});\n});"
+            ],
+
+            [
+                $this->construct(JsExpression::class, [
+                    'console.log(\'test\');',
+                    [
+                        $this->makeEmpty(ModuleInterface::class, [
+                            'getAlias' => 'mod1',
+                            'getOptions' => [
+                                'systemjs' => ['exports' => 'export_alias']
+                            ],
                             'getFiles' => ['testing.js' => []]
                         ]),
                         $this->makeEmpty(ModuleInterface::class, [
@@ -96,7 +119,7 @@ class InlineRendererTest extends Unit
                         ])
                     ]
                 ]),
-                "System.import(\"mod2\").then(function() {\nSystem.import(\"mod1\").then(function(__sjs_module_1) {\nvar export_alias = __sjs_module_1.default;\nconsole.log('test');\n});\n});"
+                "System.import(\"mod1\").then(function(__sjs_module_1) {\nvar export_alias = __sjs_module_1.default;\nSystem.import(\"mod2\").then(function() {\nconsole.log('test');\n});\n});"
             ],
         ];
     }

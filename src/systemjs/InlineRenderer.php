@@ -47,7 +47,7 @@ class InlineRenderer extends BaseObject implements JsRendererInterface
         $this->seen = $modules = [];
 
         foreach ($dependencies as $dependency) {
-            $modules = array_merge($this->resolveDependencies($dependency), $modules);
+            $modules = array_merge($modules, $this->resolveDependencies($dependency));
         }
 
         $modules = array_filter($modules,
