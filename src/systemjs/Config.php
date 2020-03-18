@@ -35,8 +35,6 @@ class Config extends \ischenko\yii2\jsloader\base\Config
 
             if (($files = $module->getFiles()) !== []) {
                 $importMap['imports'][$alias] = key($files);
-            } elseif (($deps = $module->getDependencies()) !== []) {
-                $importMap['imports'][$alias] = current($deps)->getAlias();
             }
 
             // default folder mapping

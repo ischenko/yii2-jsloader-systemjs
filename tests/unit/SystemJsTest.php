@@ -330,7 +330,6 @@ class SystemJsTest extends Unit
                 1,
                 "{
     \"imports\": {
-        \"test1\": \"test1/testing\",
         \"test1/\": \"/url/\",
         \"test1/testing\": \"/url/testing.js\",
         \"test1/s/testing\": \"/url/s/testing.js\"

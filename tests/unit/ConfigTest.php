@@ -64,7 +64,7 @@ class ConfigTest extends Unit
                         ]
                     ])
                 ],
-                ['imports' => ['test' => 'testDep', 'test/' => 'test/url/']]
+                ['imports' => ['test/' => 'test/url/']]
             ],
 
             [
@@ -97,8 +97,7 @@ class ConfigTest extends Unit
                         'test/js/file1' => 'test/url/js/file1.js',
                         'test/js/file2' => 'test/url/js/file2.js',
                         'test1/url/js/file3' => 'test1/url/js/file3.js',
-                        'test/' => 'test/url/',
-                        'test' => 'test/js/file1'
+                        'test/' => 'test/url/'
                     ]
                 ]
             ],
