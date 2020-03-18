@@ -7,6 +7,7 @@
 
 namespace ischenko\yii2\jsloader\systemjs;
 
+use ischenko\yii2\jsloader\filters\NotEmptyFiles;
 use ischenko\yii2\jsloader\helpers\FileHelper;
 use ischenko\yii2\jsloader\ModuleInterface;
 
@@ -66,21 +67,16 @@ class Config extends \ischenko\yii2\jsloader\base\Config
      */
     private function prepareModules(): void
     {
-        foreach ($this->getModules() as $module) {
+        $extension = '.js';
+
+        foreach ($this->getModules(new NotEmptyFiles(2)) as $module) {
             $files = $module->getFiles();
-
-            // skip modules without files or with single file
-            if (count($files) <= 1) {
-                continue;
-            }
-
             $dependencies = $module->getDependencies();
 
             $module->clearFiles();
             $module->clearDependencies();
 
             $prevModule = null;
-            $extension = '.js';
 
             $alias = $module->getAlias();
             $baseUrl = $module->getBaseUrl();
