@@ -61,11 +61,12 @@ class InlineRenderer extends BaseObject implements JsRendererInterface
         foreach (array_reverse($modules) as $module) {
             $alias = $module->getAlias();
 
+            $export = '';
             $import = "System.import(" . Json::encode($alias) . ")";
 
-            $export = $module instanceof Module
-                ? $module->getExports()
-                : $module->getOptions()['systemjs']['exports'] ?? '';
+            if ($module instanceof Module) {
+                $export = $module->getExports();
+            }
 
             if (!empty($export)) {
                 $code = "var {$export} = __sjs_module_" . $this->moduleIndex . ".default;\n{$code}";

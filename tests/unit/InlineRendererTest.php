@@ -4,8 +4,8 @@ namespace ischenko\yii2\jsloader\tests\unit\systemjs;
 
 use Codeception\Test\Unit;
 use ischenko\yii2\jsloader\helpers\JsExpression;
-use ischenko\yii2\jsloader\ModuleInterface;
 use ischenko\yii2\jsloader\systemjs\InlineRenderer;
+use ischenko\yii2\jsloader\systemjs\Module;
 
 class InlineRendererTest extends Unit
 {
@@ -37,7 +37,7 @@ class InlineRendererTest extends Unit
                 $this->construct(JsExpression::class, [
                     'console.log(\'test\');',
                     [
-                        $this->makeEmpty(ModuleInterface::class,
+                        $this->makeEmpty(Module::class,
                             ['getAlias' => 'mod', 'getFiles' => ['testing.js' => []]])
                     ]
                 ]),
@@ -48,11 +48,9 @@ class InlineRendererTest extends Unit
                 $this->construct(JsExpression::class, [
                     'console.log(\'test\');',
                     [
-                        $this->makeEmpty(ModuleInterface::class, [
+                        $this->makeEmpty(Module::class, [
                             'getAlias' => 'mod',
-                            'getOptions' => [
-                                'systemjs' => ['exports' => 'export_alias']
-                            ],
+                            'getExports' => 'export_alias',
                             'getFiles' => ['testing.js' => []]
                         ])
                     ]
@@ -64,14 +62,12 @@ class InlineRendererTest extends Unit
                 $this->construct(JsExpression::class, [
                     'console.log(\'test\');',
                     [
-                        $this->makeEmpty(ModuleInterface::class, [
+                        $this->makeEmpty(Module::class, [
                             'getAlias' => 'mod1',
-                            'getOptions' => [
-                                'systemjs' => ['exports' => 'export_alias']
-                            ],
+                            'getExports' => 'export_alias',
                             'getFiles' => ['testing.js' => []]
                         ]),
-                        $this->makeEmpty(ModuleInterface::class, [
+                        $this->makeEmpty(Module::class, [
                             'getAlias' => 'mod2'
                         ])
                     ]
@@ -83,17 +79,15 @@ class InlineRendererTest extends Unit
                 $this->construct(JsExpression::class, [
                     'console.log(\'test\');',
                     [
-                        $this->makeEmpty(ModuleInterface::class, [
+                        $this->makeEmpty(Module::class, [
                             'getAlias' => 'mod1',
-                            'getOptions' => [
-                                'systemjs' => ['exports' => 'export_alias']
-                            ],
+                            'getExports' => 'export_alias',
                             'getDependencies' => function () use (&$s5mod2) {
                                 return [$s5mod2];
                             },
                             'getFiles' => ['testing.js' => []]
                         ]),
-                        $s5mod2 = $this->makeEmpty(ModuleInterface::class, [
+                        $s5mod2 = $this->makeEmpty(Module::class, [
                             'getAlias' => 'mod2',
                             'getFiles' => ['testing2.js' => []]
                         ])
@@ -106,14 +100,12 @@ class InlineRendererTest extends Unit
                 $this->construct(JsExpression::class, [
                     'console.log(\'test\');',
                     [
-                        $this->makeEmpty(ModuleInterface::class, [
+                        $this->makeEmpty(Module::class, [
                             'getAlias' => 'mod1',
-                            'getOptions' => [
-                                'systemjs' => ['exports' => 'export_alias']
-                            ],
+                            'getExports' => 'export_alias',
                             'getFiles' => ['testing.js' => []]
                         ]),
-                        $this->makeEmpty(ModuleInterface::class, [
+                        $this->makeEmpty(Module::class, [
                             'getAlias' => 'mod2',
                             'getFiles' => ['testing2.js' => []]
                         ])
