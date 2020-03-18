@@ -82,4 +82,51 @@ Loader accepts the following options:
      ...
  ```
 
+Нou can set alias, exports, init options from asset bundle:
+
+```php
+class jQueryFireflyAsset extends AssetBundle
+{
+    public $js
+        = [
+            'jquery.firefly.min.js'
+        ];
+
+    public $jsOptions
+        = [
+            'systemjs' => [
+                'alias' => 'jqff',
+                'exports' => 'jquery_firefly'
+            ]
+        ];
+
+    public $depends
+        = [
+            'yii\web\JqueryAsset',
+        ];
+}
+```
+
+Generated imports map will look as follows:
+
+```JSON
+{
+  "imports": {
+    "jqff": "/pub/assets/dir/jquery.firefly.min.js"
+  }
+}
+```
+
+And JS code on the page will be wrapped by the following:
+
+```JavaScript
+System.import("yii\\web\\JqueryAsset").then(function() {
+    System.import("jqff").then(function(__sjs_module_1) {
+        var jquery_firefly = __sjs_module_1.default;
+
+        // page code goes here
+    });
+});
+```
+
 **Please note** that aliases works only within client-side code. On server-side you still need to operate with actual module names.
